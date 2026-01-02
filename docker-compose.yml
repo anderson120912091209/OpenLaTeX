@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_INSTANT_APP_ID=${NEXT_PUBLIC_INSTANT_APP_ID}
+      - NEXT_PUBLIC_RAILWAY_ENDPOINT_URL=http://api:8000
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    env_file:
+      - .env.local
+    depends_on:
+      - api
+    volumes:
+      - ./.next:/app/.next
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ./railway-api
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - FLASK_ENV=production
+    restart: unless-stopped
+

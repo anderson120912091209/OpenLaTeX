@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_INSTANT_APP_ID=${NEXT_PUBLIC_INSTANT_APP_ID}
+      - NEXT_PUBLIC_RAILWAY_ENDPOINT_URL=http://api:8000
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    env_file:
+      - .env.local
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - api
+    command: npm run dev
+
+  api:
+    build:
+      context: ./railway-api
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8000:8000"
+    environment:
+      - FLASK_ENV=development
+    volumes:
+      - ./railway-api:/app
+    command: hypercorn main:app --reload --bind 0.0.0.0:8000
+
